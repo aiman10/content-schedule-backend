@@ -24,12 +24,42 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+REST API (NestJS + MongoDB) backing the Film Enthusiast SPA.
+
+## Security & configuration
+
+All configuration comes from environment variables — **no secrets are committed**.
+Copy `.env.example` to `.env` and fill it in:
+
+| Variable | Purpose |
+|---|---|
+| `MONGODB_URI` | MongoDB connection string (includes credentials) |
+| `MONGODB_DB` | Database name (default `ContentCalender`) |
+| `AUTH0_DOMAIN` | Auth0 tenant domain, e.g. `dev-...us.auth0.com` |
+| `AUTH0_AUDIENCE` | Identifier of the Auth0 API created for this backend |
+| `CORS_ORIGINS` | Comma-separated allowed front-end origins (no wildcard) |
+| `PORT` | Listen port (Render sets this automatically) |
+
+What is enforced:
+
+- **Auth0 JWT validation** on every route (RS256 via the tenant JWKS, with
+  `iss` / `aud` / `exp` checked). Missing/invalid token → **401**. Only the
+  `GET /` health route is `@Public()`.
+- **CORS** restricted to `CORS_ORIGINS` (the app fails closed if it is unset).
+- **Body validation** via a global `ValidationPipe` + DTOs on `POST`/`PUT /movies`
+  (unknown fields stripped, so NoSQL-operator payloads can't reach Mongo).
+- **Rate limiting** at 100 requests/minute per IP.
+
+> Ops follow-ups that can't be done in code: **rotate the MongoDB credentials**
+> (the old `Admin:admin` pair was committed to git history and is compromised),
+> rotate the RapidAPI key, create the Auth0 API to obtain `AUTH0_AUDIENCE`, and
+> purge the secrets from git history (BFG / git-filter-repo).
 
 ## Installation
 
 ```bash
 $ npm install
+$ cp .env.example .env   # then fill in the values
 ```
 
 ## Running the app

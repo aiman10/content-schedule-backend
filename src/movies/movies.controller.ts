@@ -1,30 +1,27 @@
 import {
+  BadRequestException,
   Body,
   Controller,
-  Delete,
   Get,
-  Header,
   HttpException,
   HttpStatus,
-  Options,
   Param,
-  ParseIntPipe,
   Post,
   Put,
 } from '@nestjs/common';
+import { ObjectId } from 'mongodb';
 import { MovieService } from 'src/movie/movie.service';
-import { IFilm } from 'src/type';
+import { CreateMovieDto } from './dto/create-movie.dto';
+import { UpdateMovieDto } from './dto/update-movie.dto';
 
 @Controller('movies')
 export class MoviesController {
   constructor(private service: MovieService) {}
 
-  @Options()
-  @Header('Access-Control-Allow-Origin', '*')
-  @Header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE')
-  @Header('Access-Control-Allow-Headers', 'Content-Type')
-  public options() {
-    return {};
+  private assertValidId(id: string): void {
+    if (!ObjectId.isValid(id)) {
+      throw new BadRequestException('Invalid movie id');
+    }
   }
 
   @Get()
@@ -34,6 +31,7 @@ export class MoviesController {
 
   @Get(':id')
   public async getMovieById(@Param('id') id: string) {
+    this.assertValidId(id);
     const movie = await this.service.getMovieById(id);
     if (!movie) {
       throw new HttpException('Movie not found', HttpStatus.NOT_FOUND);
@@ -52,7 +50,7 @@ export class MoviesController {
   }
 
   @Post()
-  public async addMovie(@Body() movie: IFilm) {
+  public async addMovie(@Body() movie: CreateMovieDto) {
     try {
       return await this.service.addMovie(movie);
     } catch (error) {
@@ -77,7 +75,11 @@ export class MoviesController {
   }
 
   @Put(':id')
-  public async updateMovie(@Body() movie: IFilm, @Param('id') id: string) {
+  public async updateMovie(
+    @Body() movie: UpdateMovieDto,
+    @Param('id') id: string,
+  ) {
+    this.assertValidId(id);
     return this.service.updateMovie(id, movie);
   }
 }

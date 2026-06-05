@@ -1,60 +1,27 @@
 import { Injectable } from '@nestjs/common';
-import { MongoClient } from 'mongodb';
-import { ObjectId } from 'mongodb';
-
-const url =
-  'mongodb+srv://Admin:admin@webframeworkscluster.0dkna9w.mongodb.net/test';
+import { DatabaseService } from 'src/database/database.service';
 
 @Injectable()
 export class CastCrewService {
-  private client = new MongoClient(url);
-
-  constructor() {}
-
-  onModuleInit() {
-    this.client.connect();
-  }
-
-  onModuleDestroy() {
-    this.client.close();
-  }
+  constructor(private readonly db: DatabaseService) {}
 
   //get actors from db
   public async getAllActors() {
-    let actor = await this.client
-      .db('ContentCalender')
-      .collection('actors')
-      .find({})
-      .toArray();
-    return actor;
+    return this.db.collection('actors').find({}).toArray();
   }
+
   //get actresses from db
   public async getAllActresses() {
-    let actress = await this.client
-      .db('ContentCalender')
-      .collection('actresses')
-      .find({})
-      .toArray();
-    return actress;
+    return this.db.collection('actresses').find({}).toArray();
   }
 
   //get directors from db
   public async getAllDirectors() {
-    let director = await this.client
-      .db('ContentCalender')
-      .collection('directors')
-      .find({})
-      .toArray();
-    return director;
+    return this.db.collection('directors').find({}).toArray();
   }
 
   //get composers from db
   public async getAllComposers() {
-    let composer = await this.client
-      .db('ContentCalender')
-      .collection('composers')
-      .find({})
-      .toArray();
-    return composer;
+    return this.db.collection('composers').find({}).toArray();
   }
 }
